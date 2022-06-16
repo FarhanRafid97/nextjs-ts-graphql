@@ -1,14 +1,26 @@
 import { Box, Flex, Link, Text, Button } from '@chakra-ui/react';
 import React from 'react';
-import { useMyBioQuery } from '../src/generated/graphql';
+import { useLogoutMutation, useMyBioQuery } from '../src/generated/graphql';
 import NextLink from 'next/link';
+import { useRouter } from 'next/router';
+import { isServer } from '../utils/isServer';
 interface NavbarProps {}
 
 const Navbar: React.FC<NavbarProps> = ({}) => {
-  const [{ data, fetching }] = useMyBioQuery();
+  const router = useRouter();
+
+  const [{ fetching: logoutFetch }, logout] = useLogoutMutation();
+  const [{ data, fetching }] = useMyBioQuery({
+    pause: isServer(),
+  });
+
+  const logoutHandler = () => {
+    logout();
+    router.push('/login');
+  };
 
   let body;
-  if (fetching) {
+  if (isServer() || fetching) {
   } else if (!data?.myBio) {
     body = (
       <>
@@ -23,12 +35,20 @@ const Navbar: React.FC<NavbarProps> = ({}) => {
   } else {
     body = (
       <>
-        <Text>{data?.myBio?.username}</Text>
-        <Button>Logout</Button>
+        <Flex>
+          <Box mr={2}>{data.myBio.username}</Box>
+          <Button
+            onClick={logoutHandler}
+            isLoading={logoutFetch}
+            variant="link"
+          >
+            logout
+          </Button>
+        </Flex>
       </>
     );
   }
-  console.log(body);
+
   return (
     <Flex w="100%" justifyContent="space-between" p={5}>
       <Box>

@@ -1,6 +1,5 @@
 query MyBio {
   myBio {
-    username
-    id
+    ...RegularUser
   }
 }

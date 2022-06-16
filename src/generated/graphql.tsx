@@ -30,6 +30,7 @@ export type Mutation = {
   createUser: UserResponse;
   deletePost: Scalars['String'];
   loginUser: UserResponse;
+  logout: Scalars['Boolean'];
   updatePost?: Maybe<Post>;
 };
 
@@ -107,12 +108,19 @@ export type UsernamePasswordInput = {
   username: Scalars['String'];
 };
 
+export type RegularUserFragment = { __typename?: 'User', id: number, username: string };
+
 export type LoginMutationVariables = Exact<{
   option: UsernamePasswordInput;
 }>;
 
 
-export type LoginMutation = { __typename?: 'Mutation', loginUser: { __typename?: 'UserResponse', user?: { __typename?: 'User', username: string, id: number } | null, error?: Array<{ __typename?: 'FieldError', field: string, message: string, status: number }> | null } };
+export type LoginMutation = { __typename?: 'Mutation', loginUser: { __typename?: 'UserResponse', user?: { __typename?: 'User', id: number, username: string } | null, error?: Array<{ __typename?: 'FieldError', field: string, status: number, message: string }> | null } };
+
+export type LogoutMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type LogoutMutation = { __typename?: 'Mutation', logout: boolean };
 
 export type RegisterMutationVariables = Exact<{
   username: Scalars['String'];
@@ -125,34 +133,51 @@ export type RegisterMutation = { __typename?: 'Mutation', createUser: { __typena
 export type MyBioQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type MyBioQuery = { __typename?: 'Query', myBio?: { __typename?: 'User', username: string, id: number } | null };
+export type MyBioQuery = { __typename?: 'Query', myBio?: { __typename?: 'User', id: number, username: string } | null };
+
+export type PostQueryVariables = Exact<{ [key: string]: never; }>;
 
 
+export type PostQuery = { __typename?: 'Query', posts: Array<{ __typename?: 'Post', id: number, email: string, age: number }> };
+
+export const RegularUserFragmentDoc = gql`
+    fragment RegularUser on User {
+  id
+  username
+}
+    `;
 export const LoginDocument = gql`
     mutation Login($option: UsernamePasswordInput!) {
   loginUser(option: $option) {
     user {
-      username
-      id
+      ...RegularUser
     }
     error {
       field
-      message
       status
+      message
     }
   }
 }
-    `;
+    ${RegularUserFragmentDoc}`;
 
 export function useLoginMutation() {
   return Urql.useMutation<LoginMutation, LoginMutationVariables>(LoginDocument);
+};
+export const LogoutDocument = gql`
+    mutation Logout {
+  logout
+}
+    `;
+
+export function useLogoutMutation() {
+  return Urql.useMutation<LogoutMutation, LogoutMutationVariables>(LogoutDocument);
 };
 export const RegisterDocument = gql`
     mutation Register($username: String!, $password: String!) {
   createUser(option: {username: $username, password: $password}) {
     user {
-      id
-      username
+      ...RegularUser
     }
     error {
       field
@@ -161,7 +186,7 @@ export const RegisterDocument = gql`
     }
   }
 }
-    `;
+    ${RegularUserFragmentDoc}`;
 
 export function useRegisterMutation() {
   return Urql.useMutation<RegisterMutation, RegisterMutationVariables>(RegisterDocument);
@@ -169,12 +194,24 @@ export function useRegisterMutation() {
 export const MyBioDocument = gql`
     query MyBio {
   myBio {
-    username
+    ...RegularUser
+  }
+}
+    ${RegularUserFragmentDoc}`;
+
+export function useMyBioQuery(options?: Omit<Urql.UseQueryArgs<MyBioQueryVariables>, 'query'>) {
+  return Urql.useQuery<MyBioQuery>({ query: MyBioDocument, ...options });
+};
+export const PostDocument = gql`
+    query Post {
+  posts {
     id
+    email
+    age
   }
 }
     `;
 
-export function useMyBioQuery(options?: Omit<Urql.UseQueryArgs<MyBioQueryVariables>, 'query'>) {
-  return Urql.useQuery<MyBioQuery>({ query: MyBioDocument, ...options });
+export function usePostQuery(options?: Omit<Urql.UseQueryArgs<PostQueryVariables>, 'query'>) {
+  return Urql.useQuery<PostQuery>({ query: PostDocument, ...options });
 };
