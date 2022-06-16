@@ -1,0 +1,6 @@
+query MyBio {
+  myBio {
+    username
+    id
+  }
+}

@@ -44,9 +44,7 @@ export type MutationCreatePostArgs = {
 
 
 export type MutationCreateUserArgs = {
-  createdAt?: InputMaybe<Scalars['DateTime']>;
   option: UsernamePasswordInput;
-  updatedAt?: InputMaybe<Scalars['DateTime']>;
 };
 
 
@@ -109,6 +107,13 @@ export type UsernamePasswordInput = {
   username: Scalars['String'];
 };
 
+export type LoginMutationVariables = Exact<{
+  option: UsernamePasswordInput;
+}>;
+
+
+export type LoginMutation = { __typename?: 'Mutation', loginUser: { __typename?: 'UserResponse', user?: { __typename?: 'User', username: string, id: number } | null, error?: Array<{ __typename?: 'FieldError', field: string, message: string, status: number }> | null } };
+
 export type RegisterMutationVariables = Exact<{
   username: Scalars['String'];
   password: Scalars['String'];
@@ -117,7 +122,31 @@ export type RegisterMutationVariables = Exact<{
 
 export type RegisterMutation = { __typename?: 'Mutation', createUser: { __typename?: 'UserResponse', user?: { __typename?: 'User', id: number, username: string } | null, error?: Array<{ __typename?: 'FieldError', field: string, status: number, message: string }> | null } };
 
+export type MyBioQueryVariables = Exact<{ [key: string]: never; }>;
 
+
+export type MyBioQuery = { __typename?: 'Query', myBio?: { __typename?: 'User', username: string, id: number } | null };
+
+
+export const LoginDocument = gql`
+    mutation Login($option: UsernamePasswordInput!) {
+  loginUser(option: $option) {
+    user {
+      username
+      id
+    }
+    error {
+      field
+      message
+      status
+    }
+  }
+}
+    `;
+
+export function useLoginMutation() {
+  return Urql.useMutation<LoginMutation, LoginMutationVariables>(LoginDocument);
+};
 export const RegisterDocument = gql`
     mutation Register($username: String!, $password: String!) {
   createUser(option: {username: $username, password: $password}) {
@@ -136,4 +165,16 @@ export const RegisterDocument = gql`
 
 export function useRegisterMutation() {
   return Urql.useMutation<RegisterMutation, RegisterMutationVariables>(RegisterDocument);
+};
+export const MyBioDocument = gql`
+    query MyBio {
+  myBio {
+    username
+    id
+  }
+}
+    `;
+
+export function useMyBioQuery(options?: Omit<Urql.UseQueryArgs<MyBioQueryVariables>, 'query'>) {
+  return Urql.useQuery<MyBioQuery>({ query: MyBioDocument, ...options });
 };
