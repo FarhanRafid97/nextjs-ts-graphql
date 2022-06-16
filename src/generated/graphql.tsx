@@ -55,7 +55,8 @@ export type MutationDeletePostArgs = {
 
 
 export type MutationLoginUserArgs = {
-  option: UsernamePasswordInput;
+  password: Scalars['String'];
+  usernameOrEmail: Scalars['String'];
 };
 
 
@@ -92,6 +93,7 @@ export type QueryPostArgs = {
 export type User = {
   __typename?: 'User';
   createdAt: Scalars['DateTime'];
+  email: Scalars['String'];
   id: Scalars['Float'];
   updatedAt: Scalars['DateTime'];
   username: Scalars['String'];
@@ -104,6 +106,7 @@ export type UserResponse = {
 };
 
 export type UsernamePasswordInput = {
+  email: Scalars['String'];
   password: Scalars['String'];
   username: Scalars['String'];
 };
@@ -111,7 +114,8 @@ export type UsernamePasswordInput = {
 export type RegularUserFragment = { __typename?: 'User', id: number, username: string };
 
 export type LoginMutationVariables = Exact<{
-  option: UsernamePasswordInput;
+  usernameOrEmail: Scalars['String'];
+  password: Scalars['String'];
 }>;
 
 
@@ -123,8 +127,7 @@ export type LogoutMutationVariables = Exact<{ [key: string]: never; }>;
 export type LogoutMutation = { __typename?: 'Mutation', logout: boolean };
 
 export type RegisterMutationVariables = Exact<{
-  username: Scalars['String'];
-  password: Scalars['String'];
+  option: UsernamePasswordInput;
 }>;
 
 
@@ -147,8 +150,8 @@ export const RegularUserFragmentDoc = gql`
 }
     `;
 export const LoginDocument = gql`
-    mutation Login($option: UsernamePasswordInput!) {
-  loginUser(option: $option) {
+    mutation Login($usernameOrEmail: String!, $password: String!) {
+  loginUser(usernameOrEmail: $usernameOrEmail, password: $password) {
     user {
       ...RegularUser
     }
@@ -174,8 +177,8 @@ export function useLogoutMutation() {
   return Urql.useMutation<LogoutMutation, LogoutMutationVariables>(LogoutDocument);
 };
 export const RegisterDocument = gql`
-    mutation Register($username: String!, $password: String!) {
-  createUser(option: {username: $username, password: $password}) {
+    mutation Register($option: UsernamePasswordInput!) {
+  createUser(option: $option) {
     user {
       ...RegularUser
     }
