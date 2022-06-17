@@ -1,7 +1,10 @@
-query Post {
+query Posts {
   posts {
     id
-    email
-    age
+    title
+    text
+    points
+    creatorId
+    createdAt
   }
 }

@@ -1,18 +1,19 @@
-import { Box } from '@chakra-ui/layout';
-import { Button } from '@chakra-ui/react';
+import { Button, Flex, Link, Text } from '@chakra-ui/react';
 import { Formik, Form } from 'formik';
 import { NextPage } from 'next';
 import { withUrqlClient } from 'next-urql';
-import router from 'next/router';
+
 import React, { useState } from 'react';
 import InputField from '../../components/InputField';
 import Wrapper from '../../components/Wrapper';
 import { useChangePasswordMutation } from '../../src/generated/graphql';
 import { createUrqlClient } from '../../utils/createUrqlClient';
 import { errorHandler } from '../../utils/errorHandler';
-import register from '../register';
+import NextLink from 'next/link';
+import { useRouter } from 'next/router';
 
-const ChangePassword: NextPage<{ token: string }> = ({ token }) => {
+const ChangePassword: NextPage<{}> = () => {
+  const router = useRouter();
   const [, changePassword] = useChangePasswordMutation();
 
   const [tokenError, setTokenError] = useState('');
@@ -23,7 +24,8 @@ const ChangePassword: NextPage<{ token: string }> = ({ token }) => {
         onSubmit={async (values, { setErrors }) => {
           const response = await changePassword({
             newPassword: values.newPassword,
-            token,
+            token:
+              typeof router.query.token === 'string' ? router.query.token : '',
           });
           if (response.data?.changePassword.error) {
             const errorMap = errorHandler(response.data.changePassword.error);
@@ -45,7 +47,14 @@ const ChangePassword: NextPage<{ token: string }> = ({ token }) => {
               placeholder="New Password"
               type="password"
             />
-            {tokenError && <Box>{tokenError}</Box>}
+            {tokenError && (
+              <Flex columnGap="5px">
+                <Text color="red">{tokenError}</Text>
+                <NextLink href="/forget-password">
+                  <Link color="blue.500">Get a New One</Link>
+                </NextLink>
+              </Flex>
+            )}
             <Button
               type="submit"
               colorScheme="yellow"
@@ -61,9 +70,4 @@ const ChangePassword: NextPage<{ token: string }> = ({ token }) => {
   );
 };
 
-ChangePassword.getInitialProps = ({ query }) => {
-  return {
-    token: query.token as string,
-  };
-};
 export default withUrqlClient(createUrqlClient)(ChangePassword);

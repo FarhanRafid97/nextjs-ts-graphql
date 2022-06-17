@@ -8,6 +8,23 @@ import {
   RegisterMutation,
 } from '../src/generated/graphql';
 import { betterUpdateQuery } from './betterUpdateQuery';
+import { pipe, tap } from 'wonka';
+import { Exchange } from 'urql';
+import Router from 'next/router';
+
+const errorExchange: Exchange =
+  ({ forward }) =>
+  (ops$) => {
+    return pipe(
+      forward(ops$),
+      tap(({ error }) => {
+        // If the OperationResult has an error send a request to sentry
+        if (error?.message.includes('not authenticated')) {
+          Router.replace('/login');
+        }
+      })
+    );
+  };
 
 export const createUrqlClient = (ssrExchange: any) => ({
   url: 'http://localhost:4000/graphql',
@@ -45,6 +62,20 @@ export const createUrqlClient = (ssrExchange: any) => ({
               }
             );
           },
+          // createPost: (_result, args, cache, info) => {
+          //   betterUpdateQuery<CreatePostMutation, PostsQuery>(
+          //     cache,
+          //     { query: PostsDocument },
+          //     _result,
+          //     (result, query) => {
+          //       if(!result){
+          //         return un
+          //       }
+
+          //       return result.crea
+          //     }
+          //   );
+          // },
           createUser: (_result, args, cache, info) => {
             betterUpdateQuery<RegisterMutation, MyBioQuery>(
               cache,
@@ -64,6 +95,7 @@ export const createUrqlClient = (ssrExchange: any) => ({
         },
       },
     }),
+    errorExchange,
     ssrExchange,
     fetchExchange,
   ],

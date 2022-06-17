@@ -1,22 +1,24 @@
 import type { NextPage } from 'next';
-
 import { withUrqlClient } from 'next-urql';
 import Navbar from '../components/Navbar';
-import { usePostQuery } from '../src/generated/graphql';
-
 import { createUrqlClient } from '../utils/createUrqlClient';
 import { Text, Container } from '@chakra-ui/react';
+import { usePostsQuery } from '../src/generated/graphql';
+import Layout from '../components/Layout';
+
 const Home: NextPage = () => {
-  const [{ data }] = usePostQuery();
+  const [{ data }] = usePostsQuery();
+  console.log(data);
   return (
     <>
-      <Navbar />
-      <Container> TEST</Container>
-      {!data ? (
-        <Text>Loading</Text>
-      ) : (
-        data.posts.map((data) => <Text key={data.id}>{data.email}</Text>)
-      )}
+      <Layout>
+        <Container> TEST</Container>
+        {!data ? (
+          <Text>Loading</Text>
+        ) : (
+          data.posts.map((data) => <Text key={data.id}>{data.title}</Text>)
+        )}
+      </Layout>
     </>
   );
 };

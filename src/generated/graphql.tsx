@@ -17,11 +17,22 @@ export type Scalars = {
   DateTime: any;
 };
 
+export type EmailResponse = {
+  __typename?: 'EmailResponse';
+  error?: Maybe<Array<FieldError>>;
+  linkEmail?: Maybe<Scalars['String']>;
+};
+
 export type FieldError = {
   __typename?: 'FieldError';
   field: Scalars['String'];
   message: Scalars['String'];
   status: Scalars['Float'];
+};
+
+export type FieldInput = {
+  text: Scalars['String'];
+  title: Scalars['String'];
 };
 
 export type Mutation = {
@@ -30,7 +41,7 @@ export type Mutation = {
   createPost: Post;
   createUser: UserResponse;
   deletePost: Scalars['String'];
-  forgetPassword: Scalars['Boolean'];
+  forgetPassword: EmailResponse;
   loginUser: UserResponse;
   logout: Scalars['Boolean'];
   updatePost?: Maybe<Post>;
@@ -44,11 +55,7 @@ export type MutationChangePasswordArgs = {
 
 
 export type MutationCreatePostArgs = {
-  age: Scalars['Float'];
-  createdAt?: InputMaybe<Scalars['DateTime']>;
-  email: Scalars['String'];
-  name: Scalars['String'];
-  updatedAt?: InputMaybe<Scalars['DateTime']>;
+  input: FieldInput;
 };
 
 
@@ -74,19 +81,18 @@ export type MutationLoginUserArgs = {
 
 
 export type MutationUpdatePostArgs = {
-  age?: InputMaybe<Scalars['Float']>;
-  email?: InputMaybe<Scalars['String']>;
-  id?: InputMaybe<Scalars['Float']>;
-  name?: InputMaybe<Scalars['String']>;
+  id: Scalars['Float'];
+  input: FieldInput;
 };
 
 export type Post = {
   __typename?: 'Post';
-  age: Scalars['Float'];
   createdAt: Scalars['DateTime'];
-  email: Scalars['String'];
+  creatorId: Scalars['Float'];
   id: Scalars['Float'];
-  name: Scalars['String'];
+  points: Scalars['Float'];
+  text: Scalars['String'];
+  title: Scalars['String'];
   updatedAt: Scalars['DateTime'];
 };
 
@@ -100,7 +106,7 @@ export type Query = {
 
 
 export type QueryPostArgs = {
-  id: Scalars['Int'];
+  id: Scalars['Float'];
 };
 
 export type User = {
@@ -138,6 +144,21 @@ export type ChangePasswordMutationVariables = Exact<{
 
 export type ChangePasswordMutation = { __typename?: 'Mutation', changePassword: { __typename?: 'UserResponse', user?: { __typename?: 'User', id: number, username: string } | null, error?: Array<{ __typename?: 'FieldError', field: string, status: number, message: string }> | null } };
 
+export type CreatePostMutationVariables = Exact<{
+  title: Scalars['String'];
+  text: Scalars['String'];
+}>;
+
+
+export type CreatePostMutation = { __typename?: 'Mutation', createPost: { __typename?: 'Post', title: string, text: string, points: number, creatorId: number, updatedAt: any, createdAt: any } };
+
+export type ForgetPasswordMutationVariables = Exact<{
+  email: Scalars['String'];
+}>;
+
+
+export type ForgetPasswordMutation = { __typename?: 'Mutation', forgetPassword: { __typename?: 'EmailResponse', linkEmail?: string | null, error?: Array<{ __typename?: 'FieldError', field: string, status: number, message: string }> | null } };
+
 export type LoginMutationVariables = Exact<{
   usernameOrEmail: Scalars['String'];
   password: Scalars['String'];
@@ -163,10 +184,10 @@ export type MyBioQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type MyBioQuery = { __typename?: 'Query', myBio?: { __typename?: 'User', id: number, username: string } | null };
 
-export type PostQueryVariables = Exact<{ [key: string]: never; }>;
+export type PostsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type PostQuery = { __typename?: 'Query', posts: Array<{ __typename?: 'Post', id: number, email: string, age: number }> };
+export type PostsQuery = { __typename?: 'Query', posts: Array<{ __typename?: 'Post', id: number, title: string, text: string, points: number, creatorId: number, createdAt: any }> };
 
 export const RegularUserFragmentDoc = gql`
     fragment RegularUser on User {
@@ -202,6 +223,38 @@ export const ChangePasswordDocument = gql`
 
 export function useChangePasswordMutation() {
   return Urql.useMutation<ChangePasswordMutation, ChangePasswordMutationVariables>(ChangePasswordDocument);
+};
+export const CreatePostDocument = gql`
+    mutation CreatePost($title: String!, $text: String!) {
+  createPost(input: {title: $title, text: $text}) {
+    title
+    text
+    points
+    creatorId
+    updatedAt
+    createdAt
+  }
+}
+    `;
+
+export function useCreatePostMutation() {
+  return Urql.useMutation<CreatePostMutation, CreatePostMutationVariables>(CreatePostDocument);
+};
+export const ForgetPasswordDocument = gql`
+    mutation ForgetPassword($email: String!) {
+  forgetPassword(email: $email) {
+    linkEmail
+    error {
+      field
+      status
+      message
+    }
+  }
+}
+    `;
+
+export function useForgetPasswordMutation() {
+  return Urql.useMutation<ForgetPasswordMutation, ForgetPasswordMutationVariables>(ForgetPasswordDocument);
 };
 export const LoginDocument = gql`
     mutation Login($usernameOrEmail: String!, $password: String!) {
@@ -245,16 +298,19 @@ export const MyBioDocument = gql`
 export function useMyBioQuery(options?: Omit<Urql.UseQueryArgs<MyBioQueryVariables>, 'query'>) {
   return Urql.useQuery<MyBioQuery>({ query: MyBioDocument, ...options });
 };
-export const PostDocument = gql`
-    query Post {
+export const PostsDocument = gql`
+    query Posts {
   posts {
     id
-    email
-    age
+    title
+    text
+    points
+    creatorId
+    createdAt
   }
 }
     `;
 
-export function usePostQuery(options?: Omit<Urql.UseQueryArgs<PostQueryVariables>, 'query'>) {
-  return Urql.useQuery<PostQuery>({ query: PostDocument, ...options });
+export function usePostsQuery(options?: Omit<Urql.UseQueryArgs<PostsQueryVariables>, 'query'>) {
+  return Urql.useQuery<PostsQuery>({ query: PostsDocument, ...options });
 };
