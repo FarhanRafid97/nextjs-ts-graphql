@@ -1,5 +1,10 @@
-import { cacheExchange } from '@urql/exchange-graphcache';
-import { dedupExchange, fetchExchange } from 'urql';
+import { cacheExchange, Resolver } from '@urql/exchange-graphcache';
+import {
+  dedupExchange,
+  fetchExchange,
+  Exchange,
+  stringifyVariables,
+} from 'urql';
 import {
   LoginMutation,
   LogoutMutation,
@@ -9,8 +14,9 @@ import {
 } from '../src/generated/graphql';
 import { betterUpdateQuery } from './betterUpdateQuery';
 import { pipe, tap } from 'wonka';
-import { Exchange } from 'urql';
+
 import Router from 'next/router';
+import { kill } from 'process';
 
 const errorExchange: Exchange =
   ({ forward }) =>
@@ -26,6 +32,32 @@ const errorExchange: Exchange =
     );
   };
 
+const cursorPagination = (): Resolver => {
+  return (_parent, fieldArgs, cache, info) => {
+    const { parentKey: entityKey, fieldName } = info;
+    console.log(entityKey, fieldName);
+    const allFields = cache.inspectFields(entityKey);
+    console.log('allFields: ', allFields);
+    const fieldInfos = allFields.filter((info) => info.fieldName === fieldName);
+    const size = fieldInfos.length;
+    if (size === 0) {
+      return undefined;
+    }
+
+    const fieldKey = `${fieldName}(${stringifyVariables(fieldArgs)})`;
+    const isItInTheCache = cache.resolveFieldByKey(entityKey, fieldKey);
+    console.log(fieldInfos);
+    info.partial = !isItInTheCache;
+    const results: string[] = [];
+    fieldInfos.forEach((fi) => {
+      const data = cache.resolveFieldByKey(entityKey, fi.fieldKey) as string[];
+      results.push(...data);
+    });
+
+    return results;
+  };
+};
+
 export const createUrqlClient = (ssrExchange: any) => ({
   url: 'http://localhost:4000/graphql',
   fetchOptions: {
@@ -34,6 +66,11 @@ export const createUrqlClient = (ssrExchange: any) => ({
   exchanges: [
     dedupExchange,
     cacheExchange({
+      resolvers: {
+        Query: {
+          posts: cursorPagination(),
+        },
+      },
       updates: {
         Mutation: {
           logout: (_result, args, cache, info) => {
@@ -62,20 +99,6 @@ export const createUrqlClient = (ssrExchange: any) => ({
               }
             );
           },
-          // createPost: (_result, args, cache, info) => {
-          //   betterUpdateQuery<CreatePostMutation, PostsQuery>(
-          //     cache,
-          //     { query: PostsDocument },
-          //     _result,
-          //     (result, query) => {
-          //       if(!result){
-          //         return un
-          //       }
-
-          //       return result.crea
-          //     }
-          //   );
-          // },
           createUser: (_result, args, cache, info) => {
             betterUpdateQuery<RegisterMutation, MyBioQuery>(
               cache,
