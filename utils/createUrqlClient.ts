@@ -16,7 +16,6 @@ import { betterUpdateQuery } from './betterUpdateQuery';
 import { pipe, tap } from 'wonka';
 
 import Router from 'next/router';
-import { kill } from 'process';
 
 const errorExchange: Exchange =
   ({ forward }) =>
@@ -35,9 +34,7 @@ const errorExchange: Exchange =
 const cursorPagination = (): Resolver => {
   return (_parent, fieldArgs, cache, info) => {
     const { parentKey: entityKey, fieldName } = info;
-    console.log(entityKey, fieldName);
     const allFields = cache.inspectFields(entityKey);
-    console.log('allFields: ', allFields);
     const fieldInfos = allFields.filter((info) => info.fieldName === fieldName);
     const size = fieldInfos.length;
     if (size === 0) {
@@ -46,15 +43,24 @@ const cursorPagination = (): Resolver => {
 
     const fieldKey = `${fieldName}(${stringifyVariables(fieldArgs)})`;
     const isItInTheCache = cache.resolveFieldByKey(entityKey, fieldKey);
-    console.log(fieldInfos);
+    let isMorePost = true;
     info.partial = !isItInTheCache;
     const results: string[] = [];
     fieldInfos.forEach((fi) => {
-      const data = cache.resolveFieldByKey(entityKey, fi.fieldKey) as string[];
+      const key = cache.resolveFieldByKey(entityKey, fi.fieldKey) as string;
+      const data = cache.resolve(key, 'posts') as string[];
+      const _isMorePost = cache.resolve(key, 'isMorePost');
+      if (!_isMorePost) {
+        isMorePost = false;
+      }
       results.push(...data);
     });
 
-    return results;
+    return {
+      __typename: 'PaginatedPosts',
+      isMorePost,
+      posts: results,
+    };
   };
 };
 
@@ -66,6 +72,9 @@ export const createUrqlClient = (ssrExchange: any) => ({
   exchanges: [
     dedupExchange,
     cacheExchange({
+      keys: {
+        PaginatedPosts: () => null,
+      },
       resolvers: {
         Query: {
           posts: cursorPagination(),

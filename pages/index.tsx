@@ -42,7 +42,7 @@ const Home: NextPage = () => {
           <Text>Loading</Text>
         ) : (
           <Stack spacing={8}>
-            {data!.posts.map((data) => (
+            {data!.posts.posts.map((data) => (
               // <Text key={data.id}>{data.title}</Text>
 
               <Box key={data.id} p={5} shadow="md" borderWidth="1px">
@@ -52,13 +52,14 @@ const Home: NextPage = () => {
             ))}
           </Stack>
         )}
-        {data ? (
+        {data && data.posts.isMorePost ? (
           <Flex>
             <Button
               onClick={() => {
                 setVariables({
                   limit: variables.limit,
-                  cursor: data.posts[data.posts.length - 1].createdAt,
+                  cursor:
+                    data.posts.posts[data.posts.posts.length - 1].createdAt,
                 });
               }}
               isLoading={fetching}

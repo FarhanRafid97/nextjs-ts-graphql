@@ -59,7 +59,15 @@ const Navbar: React.FC<NavbarProps> = ({}) => {
   }
 
   return (
-    <Flex w="100%" justifyContent="space-between" p={5}>
+    <Flex
+      w="100%"
+      justifyContent="space-between"
+      p={5}
+      position="fixed"
+      top="0"
+      color="gray.100"
+      bg="blue.400"
+    >
       <Box>
         <Text>Logo</Text>
       </Box>
