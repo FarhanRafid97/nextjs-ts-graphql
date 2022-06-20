@@ -4,23 +4,28 @@ import { useRouter } from 'next/router';
 import React from 'react';
 import { useLogoutMutation, useMyBioQuery } from '../src/generated/graphql';
 import { isServer } from '../utils/isServer';
+import { useApolloClient } from '@apollo/client';
+import withApollo from '../utils/withApollo';
 interface NavbarProps {}
 
 const Navbar: React.FC<NavbarProps> = ({}) => {
   const router = useRouter();
 
-  const [{ fetching: logoutFetch }, logout] = useLogoutMutation();
-  const [{ data, fetching }] = useMyBioQuery({
-    pause: isServer(),
+  const [logout, { loading: logoutFetch }] = useLogoutMutation();
+  const apolloClient = useApolloClient();
+  const { data, loading } = useMyBioQuery({
+    skip: isServer(),
   });
+  console.log(data);
 
   const logoutHandler = () => {
     logout();
-    router.push('/login');
+    // router.push('/');
+    apolloClient.resetStore();
   };
 
   let body;
-  if (isServer() || fetching) {
+  if (isServer() || loading) {
   } else if (!data?.myBio) {
     body = (
       <>
@@ -80,4 +85,4 @@ const Navbar: React.FC<NavbarProps> = ({}) => {
   );
 };
 
-export default Navbar;
+export default withApollo({ ssr: false })(Navbar);

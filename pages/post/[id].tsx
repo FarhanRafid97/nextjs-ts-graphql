@@ -5,6 +5,7 @@ import Layout from '../../components/Layout';
 import { usePostQuery } from '../../src/generated/graphql';
 import { createUrqlClient } from '../../utils/createUrqlClient';
 import { Box, Flex, Link, Text, Button, Heading } from '@chakra-ui/react';
+import withApollo from '../../utils/withApollo';
 
 interface DetailPostProps {}
 
@@ -12,8 +13,8 @@ const DetailPost: React.FC<DetailPostProps> = ({}) => {
   const router = useRouter();
   const intId =
     typeof router.query.id === 'string' ? parseInt(router.query.id) : -1;
-  const [{ data, fetching }] = usePostQuery({
-    pause: intId === -1,
+  const { data, loading } = usePostQuery({
+    skip: intId === -1,
     variables: {
       id: intId,
     },
@@ -37,4 +38,4 @@ const DetailPost: React.FC<DetailPostProps> = ({}) => {
   );
 };
 
-export default withUrqlClient(createUrqlClient, { ssr: true })(DetailPost);
+export default withApollo({ ssr: true })(DetailPost);

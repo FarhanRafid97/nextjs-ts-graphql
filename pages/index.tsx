@@ -17,23 +17,26 @@ import { EditAndDeleteButton } from '../components/EditAndDeleteButton';
 import Layout from '../components/Layout';
 import Updoot from '../components/Updoot';
 import {
+  PostQuery,
+  PostsQuery,
   useDeletePostMutation,
   useMyBioQuery,
   usePostsQuery,
 } from '../src/generated/graphql';
 import { createUrqlClient } from '../utils/createUrqlClient';
+import withApollo from '../utils/withApollo';
 
 const Home: NextPage = () => {
-  const [variables, setVariables] = useState({
-    limit: 10,
-    cursor: null as null | string,
+  const { data, loading, fetchMore, variables } = usePostsQuery({
+    variables: {
+      limit: 15,
+      cursor: null,
+    },
+    notifyOnNetworkStatusChange: true,
   });
+  console.log(data);
 
-  const [{ data, fetching }] = usePostsQuery({
-    variables,
-  });
-
-  if (!fetching && !data) {
+  if (!loading && !data) {
     return <div>you got query failed for some reason</div>;
   }
 
@@ -46,11 +49,11 @@ const Home: NextPage = () => {
             <Link>Create Post</Link>
           </NextLink>
         </Flex>
-        {!data && fetching ? (
+        {!data && loading ? (
           <Text>Loading</Text>
         ) : (
           <Stack spacing={8}>
-            {data!.posts.posts.map((data) =>
+            {data!.posts?.posts?.map((data) =>
               !data ? null : (
                 // <Text key={data.id}>{data.title}</Text>
 
@@ -97,13 +100,34 @@ const Home: NextPage = () => {
           <Flex>
             <Button
               onClick={() => {
-                setVariables({
-                  limit: variables.limit,
-                  cursor:
-                    data.posts.posts[data.posts.posts.length - 1].createdAt,
+                fetchMore({
+                  variables: {
+                    limit: variables!.limit,
+                    cursor:
+                      data.posts.posts[data.posts.posts.length - 1].createdAt,
+                  },
+                  // updateQuery: (
+                  //   previousValues,
+                  //   { fetchMoreResult }
+                  // ): PostsQuery => {
+                  //   if (!fetchMoreResult) {
+                  //     return previousValues;
+                  //   }
+                  //   return {
+                  //     __typename: 'Query',
+                  //     posts: {
+                  //       __typename: 'PaginatedPosts',
+                  //       isMorePost: fetchMoreResult.posts.isMorePost,
+                  //       posts: [
+                  //         ...previousValues.posts.posts,
+                  //         ...fetchMoreResult.posts.posts,
+                  //       ],
+                  //     },
+                  //   };
+                  // },
                 });
               }}
-              isLoading={fetching}
+              isLoading={loading}
               m="auto"
               my={8}
             >
@@ -116,4 +140,4 @@ const Home: NextPage = () => {
   );
 };
 
-export default Home;
+export default withApollo({ ssr: true })(Home);

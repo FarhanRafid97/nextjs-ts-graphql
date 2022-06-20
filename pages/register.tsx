@@ -5,21 +5,38 @@ import { useRouter } from 'next/router';
 import React from 'react';
 import InputField from '../components/InputField';
 import Wrapper from '../components/Wrapper';
-import { useRegisterMutation } from '../src/generated/graphql';
+import {
+  MyBioDocument,
+  MyBioQuery,
+  useRegisterMutation,
+} from '../src/generated/graphql';
 import { createUrqlClient } from '../utils/createUrqlClient';
 import { errorHandler } from '../utils/errorHandler';
+import withApollo from '../utils/withApollo';
 
 interface registerProps {}
 
 const Register: React.FC<registerProps> = ({}) => {
   const router = useRouter();
-  const [, register] = useRegisterMutation();
+  const [register] = useRegisterMutation();
   return (
     <Wrapper>
       <Formik
         initialValues={{ email: '', username: '', password: '' }}
         onSubmit={async (values, { setErrors }) => {
-          const response = await register({ option: values });
+          const response = await register({
+            variables: { option: values },
+            update: (cache, { data }) => {
+              cache.writeQuery<MyBioQuery>({
+                query: MyBioDocument,
+                data: {
+                  __typename: 'Query',
+                  myBio: data?.createUser.user,
+                },
+              });
+              cache.evict({ fieldName: 'posts:{}' });
+            },
+          });
           if (response.data?.createUser.error) {
             setErrors(errorHandler(response.data.createUser.error));
           } else if (response.data?.createUser.user) {
@@ -51,4 +68,4 @@ const Register: React.FC<registerProps> = ({}) => {
   );
 };
 
-export default withUrqlClient(createUrqlClient)(Register);
+export default withApollo({ ssr: false })(Register);
