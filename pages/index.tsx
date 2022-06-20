@@ -116,4 +116,4 @@ const Home: NextPage = () => {
   );
 };
 
-export default withUrqlClient(createUrqlClient, { ssr: true })(Home);
+export default Home;
