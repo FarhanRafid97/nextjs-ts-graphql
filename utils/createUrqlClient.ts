@@ -6,16 +6,20 @@ import {
   stringifyVariables,
 } from 'urql';
 import {
+  DeletePostMutation,
+  DeletePostMutationVariables,
   LoginMutation,
   LogoutMutation,
   MyBioDocument,
   MyBioQuery,
   RegisterMutation,
+  VoteMutationVariables,
 } from '../src/generated/graphql';
 import { betterUpdateQuery } from './betterUpdateQuery';
 import { pipe, tap } from 'wonka';
-
+import gql from 'graphql-tag';
 import Router from 'next/router';
+import { isServer } from './isServer';
 
 const errorExchange: Exchange =
   ({ forward }) =>
@@ -51,7 +55,7 @@ const cursorPagination = (): Resolver => {
       const data = cache.resolve(key, 'posts') as string[];
       const _isMorePost = cache.resolve(key, 'isMorePost');
       if (!_isMorePost) {
-        isMorePost = false;
+        isMorePost = _isMorePost as boolean;
       }
       results.push(...data);
     });
@@ -64,71 +68,128 @@ const cursorPagination = (): Resolver => {
   };
 };
 
-export const createUrqlClient = (ssrExchange: any) => ({
-  url: 'http://localhost:4000/graphql',
-  fetchOptions: {
-    credentials: 'include' as const,
-  },
-  exchanges: [
-    dedupExchange,
-    cacheExchange({
-      keys: {
-        PaginatedPosts: () => null,
-      },
-      resolvers: {
-        Query: {
-          posts: cursorPagination(),
+export const createUrqlClient = (ssrExchange: any, ctx: any) => {
+  let cookie = '';
+  if (isServer()) {
+    cookie = ctx.req.headers.cookie;
+  }
+
+  return {
+    url: 'http://localhost:4000/graphql',
+    fetchOptions: {
+      credentials: 'include' as const,
+      headers: cookie
+        ? {
+            cookie,
+          }
+        : undefined,
+    },
+    exchanges: [
+      dedupExchange,
+      cacheExchange({
+        keys: {
+          PaginatedPosts: () => null,
         },
-      },
-      updates: {
-        Mutation: {
-          logout: (_result, args, cache, info) => {
-            betterUpdateQuery<LogoutMutation, MyBioQuery>(
-              cache,
-              {
-                query: MyBioDocument,
-              },
-              _result,
-              () => ({ myBio: null })
-            );
-          },
-          loginUser: (_result, args, cache, info) => {
-            betterUpdateQuery<LoginMutation, MyBioQuery>(
-              cache,
-              { query: MyBioDocument },
-              _result,
-              (result, query) => {
-                if (result.loginUser.error) {
-                  return query;
-                } else {
-                  return {
-                    myBio: result.loginUser.user,
-                  };
-                }
-              }
-            );
-          },
-          createUser: (_result, args, cache, info) => {
-            betterUpdateQuery<RegisterMutation, MyBioQuery>(
-              cache,
-              { query: MyBioDocument },
-              _result,
-              (result, query) => {
-                if (result.createUser.error) {
-                  return query;
-                } else {
-                  return {
-                    myBio: result.createUser.user,
-                  };
-                }
-              }
-            );
+        resolvers: {
+          Query: {
+            posts: cursorPagination(),
           },
         },
-      },
-    }),
-    errorExchange,
-    ssrExchange,
-    fetchExchange,
-  ],
-});
+        updates: {
+          Mutation: {
+            deletePost: (_result, args, cache, info) => {
+              cache.invalidate({
+                __typename: 'Post',
+                id: (args as DeletePostMutationVariables).id,
+              });
+            },
+            vote: (_result, args, cache, info) => {
+              const { postId, value } = args as VoteMutationVariables;
+              const data = cache.readFragment(
+                gql`
+                  fragment _ on Post {
+                    id
+                    points
+                    voteStatus
+                  }
+                `,
+                { id: postId } as any
+              );
+
+              if (data) {
+                if (data.voteStatus === value) {
+                  return;
+                }
+                const newPoints =
+                  (data.points as number) + (!data.voteStatus ? 1 : 2) * value;
+                cache.writeFragment(
+                  gql`
+                    fragment __ on Post {
+                      points
+                      voteStatus
+                    }
+                  `,
+                  { id: postId, points: newPoints, voteStatus: value } as any
+                );
+              }
+            },
+            createPost: (_result, args, cache, info) => {
+              const allFields = cache.inspectFields('Query');
+              const fieldInfos = allFields.filter(
+                (info) => info.fieldName === 'posts'
+              );
+              fieldInfos.forEach((f1) => {
+                cache.invalidate('Query', 'posts', f1.arguments || {});
+              });
+            },
+            logout: (_result, args, cache, info) => {
+              betterUpdateQuery<LogoutMutation, MyBioQuery>(
+                cache,
+                {
+                  query: MyBioDocument,
+                },
+                _result,
+                () => ({ myBio: null })
+              );
+            },
+            loginUser: (_result, args, cache, info) => {
+              betterUpdateQuery<LoginMutation, MyBioQuery>(
+                cache,
+                { query: MyBioDocument },
+                _result,
+                (result, query) => {
+                  if (result.loginUser.error) {
+                    return query;
+                  } else {
+                    return {
+                      myBio: result.loginUser.user,
+                    };
+                  }
+                }
+              );
+            },
+            createUser: (_result, args, cache, info) => {
+              betterUpdateQuery<RegisterMutation, MyBioQuery>(
+                cache,
+                { query: MyBioDocument },
+                _result,
+                (result, query) => {
+                  if (result.createUser.error) {
+                    return query;
+                  } else {
+                    return {
+                      myBio: result.createUser.user,
+                    };
+                  }
+                }
+              );
+            },
+          },
+        },
+      }),
+      errorExchange,
+      ssrExchange,
+      fetchExchange,
+    ],
+  };
+};

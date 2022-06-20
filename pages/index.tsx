@@ -10,24 +10,38 @@ import {
   Flex,
   Link,
   Button,
+  Icon,
+  IconButton,
 } from '@chakra-ui/react';
-import { usePostsQuery } from '../src/generated/graphql';
+import {
+  useDeletePostMutation,
+  useMyBioQuery,
+  usePostsQuery,
+} from '../src/generated/graphql';
 import Layout from '../components/Layout';
 import React, { useState } from 'react';
 import NextLink from 'next/link';
+import Updoot from '../components/Updoot';
+import { DeleteIcon } from '@chakra-ui/icons';
 
+import { isServer } from '../utils/isServer';
 const Home: NextPage = () => {
   const [variables, setVariables] = useState({
     limit: 10,
     cursor: null as null | string,
   });
+  const [{ data: biodata }] = useMyBioQuery({
+    pause: isServer(),
+  });
   const [{ data, fetching }] = usePostsQuery({
     variables,
   });
 
+  console.log(biodata);
   if (!fetching && !data) {
     return <div>you got query failed for some reason</div>;
   }
+  const [, deletePost] = useDeletePostMutation();
 
   return (
     <>
@@ -42,14 +56,51 @@ const Home: NextPage = () => {
           <Text>Loading</Text>
         ) : (
           <Stack spacing={8}>
-            {data!.posts.posts.map((data) => (
-              // <Text key={data.id}>{data.title}</Text>
+            {data!.posts.posts.map((data) =>
+              !data ? null : (
+                // <Text key={data.id}>{data.title}</Text>
 
-              <Box key={data.id} p={5} shadow="md" borderWidth="1px">
-                <Heading fontSize="xl">{data.title}</Heading>
-                <Text mt={4}>{data.text.slice(0, 50)}...</Text>
-              </Box>
-            ))}
+                <Flex
+                  key={data.id}
+                  p={5}
+                  shadow="md"
+                  borderWidth="1px"
+                  alignItems="center"
+                >
+                  <Updoot post={data} />
+                  <Flex
+                    alignItems="center"
+                    justifyContent="space-between"
+                    w="100%"
+                  >
+                    <Box>
+                      <NextLink href="/post/[id]" as={`/post/${data.id}`}>
+                        <Link>
+                          <Heading fontSize="xl">{data.title}</Heading>
+                        </Link>
+                      </NextLink>
+                      <Flex mt={2}>
+                        Posted by{' '}
+                        <Text ml={2} color="blue.400">
+                          {data.creator.username}
+                        </Text>
+                      </Flex>
+                      <Text mt={4}>{data.text.slice(0, 50)}</Text>
+                    </Box>
+                    {biodata?.myBio?.id === data.creator.id && (
+                      <IconButton
+                        icon={<DeleteIcon />}
+                        colorScheme="red"
+                        aria-label="button"
+                        onClick={() => deletePost({ id: data.id })}
+                      >
+                        Test
+                      </IconButton>
+                    )}
+                  </Flex>
+                </Flex>
+              )
+            )}
           </Stack>
         )}
         {data && data.posts.isMorePost ? (

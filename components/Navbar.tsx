@@ -61,18 +61,22 @@ const Navbar: React.FC<NavbarProps> = ({}) => {
   return (
     <Flex
       w="100%"
-      justifyContent="space-between"
       p={5}
       position="fixed"
       top="0"
       color="gray.100"
       bg="blue.400"
+      zIndex="99"
     >
-      <Box>
-        <Text>Logo</Text>
-      </Box>
-      <Flex columnGap="15px" alignItems="center">
-        {body}
+      <Flex w={800} justifyContent="space-between" m="auto">
+        <Box>
+          <NextLink href="/">
+            <Link fontSize="18px">Home</Link>
+          </NextLink>
+        </Box>
+        <Flex columnGap="15px" alignItems="center">
+          {body}
+        </Flex>
       </Flex>
     </Flex>
   );
