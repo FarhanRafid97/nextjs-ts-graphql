@@ -71,7 +71,7 @@ const cursorPagination = (): Resolver => {
 export const createUrqlClient = (ssrExchange: any, ctx: any) => {
   let cookie = '';
   if (isServer()) {
-    cookie = ctx.req.headers.cookie;
+    cookie = ctx?.req?.headers?.cookie;
   }
 
   return {
@@ -122,6 +122,7 @@ export const createUrqlClient = (ssrExchange: any, ctx: any) => {
                 }
                 const newPoints =
                   (data.points as number) + (!data.voteStatus ? 1 : 2) * value;
+                console.log(value);
                 cache.writeFragment(
                   gql`
                     fragment __ on Post {

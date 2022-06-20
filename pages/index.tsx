@@ -1,30 +1,28 @@
+import { DeleteIcon, EditIcon } from '@chakra-ui/icons';
+import {
+  Box,
+  Button,
+  Flex,
+  Heading,
+  IconButton,
+  Link,
+  Stack,
+  Text,
+} from '@chakra-ui/react';
 import type { NextPage } from 'next';
 import { withUrqlClient } from 'next-urql';
-import Navbar from '../components/Navbar';
-import { createUrqlClient } from '../utils/createUrqlClient';
-import {
-  Text,
-  Stack,
-  Box,
-  Heading,
-  Flex,
-  Link,
-  Button,
-  Icon,
-  IconButton,
-} from '@chakra-ui/react';
+import NextLink from 'next/link';
+import React, { useState } from 'react';
+import Layout from '../components/Layout';
+import Updoot from '../components/Updoot';
 import {
   useDeletePostMutation,
   useMyBioQuery,
   usePostsQuery,
 } from '../src/generated/graphql';
-import Layout from '../components/Layout';
-import React, { useState } from 'react';
-import NextLink from 'next/link';
-import Updoot from '../components/Updoot';
-import { DeleteIcon } from '@chakra-ui/icons';
-
+import { createUrqlClient } from '../utils/createUrqlClient';
 import { isServer } from '../utils/isServer';
+
 const Home: NextPage = () => {
   const [variables, setVariables] = useState({
     limit: 10,
@@ -88,14 +86,24 @@ const Home: NextPage = () => {
                       <Text mt={4}>{data.text.slice(0, 50)}</Text>
                     </Box>
                     {biodata?.myBio?.id === data.creator.id && (
-                      <IconButton
-                        icon={<DeleteIcon />}
-                        colorScheme="red"
-                        aria-label="button"
-                        onClick={() => deletePost({ id: data.id })}
-                      >
-                        Test
-                      </IconButton>
+                      <Box>
+                        <NextLink
+                          href="/post/update/[id]"
+                          as={`/post/update/${data.id}`}
+                        >
+                          <IconButton
+                            mr={4}
+                            as={Link}
+                            icon={<EditIcon />}
+                            aria-label="button"
+                          />
+                        </NextLink>
+                        <IconButton
+                          icon={<DeleteIcon />}
+                          aria-label="button"
+                          onClick={() => deletePost({ id: data.id })}
+                        />
+                      </Box>
                     )}
                   </Flex>
                 </Flex>
