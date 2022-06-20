@@ -1,11 +1,10 @@
-import { useRouter } from 'next/router';
 import { usePostQuery } from '../src/generated/graphql';
 import { useGetIdInt } from './useGetIdint';
 
 export const useGetPostUrlForm = () => {
   const idInt = useGetIdInt();
   return usePostQuery({
-    pause: idInt === -1,
+    skip: idInt === -1,
     variables: {
       id: idInt,
     },

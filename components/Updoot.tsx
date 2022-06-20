@@ -1,15 +1,14 @@
-import { Flex, Icon, Text, IconButton } from '@chakra-ui/react';
+import { ApolloCache, useApolloClient } from '@apollo/client';
+import { ChevronDownIcon, ChevronUpIcon } from '@chakra-ui/icons';
+import { Flex, IconButton, Text } from '@chakra-ui/react';
+import gql from 'graphql-tag';
 import React, { useState } from 'react';
 import {
   PostsSnippetFragment,
   useVoteMutation,
   VoteMutation,
 } from '../src/generated/graphql';
-import { ChevronUpIcon, ChevronDownIcon } from '@chakra-ui/icons';
-import { ApolloCache, useApolloClient } from '@apollo/client';
-import { useIsAuth } from '../utils/useIsAuth';
 import withApollo from '../utils/withApollo';
-import gql from 'graphql-tag';
 
 interface UpdootProps {
   post: PostsSnippetFragment;

@@ -1,6 +1,5 @@
 import { Box, Button } from '@chakra-ui/react';
 import { Form, Formik } from 'formik';
-import { withUrqlClient } from 'next-urql';
 import { useRouter } from 'next/router';
 import React from 'react';
 import InputField from '../components/InputField';
@@ -10,7 +9,6 @@ import {
   MyBioQuery,
   useRegisterMutation,
 } from '../src/generated/graphql';
-import { createUrqlClient } from '../utils/createUrqlClient';
 import { errorHandler } from '../utils/errorHandler';
 import withApollo from '../utils/withApollo';
 

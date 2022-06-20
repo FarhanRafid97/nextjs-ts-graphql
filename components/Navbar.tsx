@@ -1,10 +1,10 @@
+import { useApolloClient } from '@apollo/client';
 import { Box, Button, Flex, Link } from '@chakra-ui/react';
 import NextLink from 'next/link';
 import { useRouter } from 'next/router';
 import React from 'react';
 import { useLogoutMutation, useMyBioQuery } from '../src/generated/graphql';
 import { isServer } from '../utils/isServer';
-import { useApolloClient } from '@apollo/client';
 import withApollo from '../utils/withApollo';
 interface NavbarProps {}
 

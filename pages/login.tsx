@@ -1,6 +1,5 @@
 import { Box, Button, Flex, Link } from '@chakra-ui/react';
 import { Form, Formik } from 'formik';
-import { withUrqlClient } from 'next-urql';
 import NextLink from 'next/link';
 import { useRouter } from 'next/router';
 import React from 'react';
@@ -11,7 +10,6 @@ import {
   MyBioQuery,
   useLoginMutation,
 } from '../src/generated/graphql';
-import { createUrqlClient } from '../utils/createUrqlClient';
 import { errorHandler } from '../utils/errorHandler';
 import withApollo from '../utils/withApollo';
 interface registerProps {}

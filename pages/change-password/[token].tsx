@@ -1,8 +1,8 @@
 import { Button, Flex, Link, Text } from '@chakra-ui/react';
-import { Formik, Form } from 'formik';
+import { Form, Formik } from 'formik';
 import { NextPage } from 'next';
-import { withUrqlClient } from 'next-urql';
-
+import NextLink from 'next/link';
+import { useRouter } from 'next/router';
 import React, { useState } from 'react';
 import InputField from '../../components/InputField';
 import Wrapper from '../../components/Wrapper';
@@ -11,10 +11,7 @@ import {
   MyBioQuery,
   useChangePasswordMutation,
 } from '../../src/generated/graphql';
-import { createUrqlClient } from '../../utils/createUrqlClient';
 import { errorHandler } from '../../utils/errorHandler';
-import NextLink from 'next/link';
-import { useRouter } from 'next/router';
 import withApollo from '../../utils/withApollo';
 
 const ChangePassword: NextPage<{}> = () => {
