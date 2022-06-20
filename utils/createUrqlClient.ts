@@ -1,4 +1,4 @@
-import { cacheExchange, Resolver } from '@urql/exchange-graphcache';
+import { cacheExchange, Resolver, Cache } from '@urql/exchange-graphcache';
 import {
   dedupExchange,
   fetchExchange,
@@ -68,6 +68,13 @@ const cursorPagination = (): Resolver => {
   };
 };
 
+const invalidatePostFunction = (cache: Cache) => {
+  const allFields = cache.inspectFields('Query');
+  const fieldInfos = allFields.filter((info) => info.fieldName === 'posts');
+  fieldInfos.forEach((f1) => {
+    cache.invalidate('Query', 'posts', f1.arguments || {});
+  });
+};
 export const createUrqlClient = (ssrExchange: any, ctx: any) => {
   let cookie = '';
   if (isServer()) {
@@ -135,13 +142,14 @@ export const createUrqlClient = (ssrExchange: any, ctx: any) => {
               }
             },
             createPost: (_result, args, cache, info) => {
-              const allFields = cache.inspectFields('Query');
-              const fieldInfos = allFields.filter(
-                (info) => info.fieldName === 'posts'
-              );
-              fieldInfos.forEach((f1) => {
-                cache.invalidate('Query', 'posts', f1.arguments || {});
-              });
+              // const allFields = cache.inspectFields('Query');
+              // const fieldInfos = allFields.filter(
+              //   (info) => info.fieldName === 'posts'
+              // );
+              // fieldInfos.forEach((f1) => {
+              //   cache.invalidate('Query', 'posts', f1.arguments || {});
+              // });
+              invalidatePostFunction(cache);
             },
             logout: (_result, args, cache, info) => {
               betterUpdateQuery<LogoutMutation, MyBioQuery>(
@@ -152,6 +160,7 @@ export const createUrqlClient = (ssrExchange: any, ctx: any) => {
                 _result,
                 () => ({ myBio: null })
               );
+              invalidatePostFunction(cache);
             },
             loginUser: (_result, args, cache, info) => {
               betterUpdateQuery<LoginMutation, MyBioQuery>(
@@ -168,6 +177,7 @@ export const createUrqlClient = (ssrExchange: any, ctx: any) => {
                   }
                 }
               );
+              invalidatePostFunction(cache);
             },
             createUser: (_result, args, cache, info) => {
               betterUpdateQuery<RegisterMutation, MyBioQuery>(

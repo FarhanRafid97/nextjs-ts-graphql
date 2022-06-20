@@ -1,14 +1,11 @@
 import { Box, Button, Flex, Link } from '@chakra-ui/react';
 import NextLink from 'next/link';
-import { useRouter } from 'next/router';
 import React from 'react';
 import { useLogoutMutation, useMyBioQuery } from '../src/generated/graphql';
 import { isServer } from '../utils/isServer';
 interface NavbarProps {}
 
 const Navbar: React.FC<NavbarProps> = ({}) => {
-  const router = useRouter();
-
   const [{ fetching: logoutFetch }, logout] = useLogoutMutation();
   const [{ data, fetching }] = useMyBioQuery({
     pause: isServer(),
@@ -16,7 +13,6 @@ const Navbar: React.FC<NavbarProps> = ({}) => {
 
   const logoutHandler = () => {
     logout();
-    router.push('/login');
   };
 
   let body;
