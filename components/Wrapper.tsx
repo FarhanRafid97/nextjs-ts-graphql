@@ -15,6 +15,7 @@ const Wrapper: React.FC<WrapperProps> = ({ children, variant }) => {
       mt="80px"
       mx="auto"
       p="15px"
+      paddingTop="35px"
     >
       {children}
     </Box>

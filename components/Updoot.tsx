@@ -29,6 +29,7 @@ const Updoot: React.FC<UpdootProps> = ({ post }) => {
     await vote({ postId: _pId, value: _value });
     setLoading(_loading);
   };
+  console.log(post);
 
   return (
     <Flex direction="column" alignItems="center" justifyContent="center" mr={4}>

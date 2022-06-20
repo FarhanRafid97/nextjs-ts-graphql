@@ -13,6 +13,7 @@ import type { NextPage } from 'next';
 import { withUrqlClient } from 'next-urql';
 import NextLink from 'next/link';
 import React, { useState } from 'react';
+import { EditAndDeleteButton } from '../components/EditAndDeleteButton';
 import Layout from '../components/Layout';
 import Updoot from '../components/Updoot';
 import {
@@ -21,25 +22,20 @@ import {
   usePostsQuery,
 } from '../src/generated/graphql';
 import { createUrqlClient } from '../utils/createUrqlClient';
-import { isServer } from '../utils/isServer';
 
 const Home: NextPage = () => {
   const [variables, setVariables] = useState({
     limit: 10,
     cursor: null as null | string,
   });
-  const [{ data: biodata }] = useMyBioQuery({
-    pause: isServer(),
-  });
+
   const [{ data, fetching }] = usePostsQuery({
     variables,
   });
 
-  console.log(biodata);
   if (!fetching && !data) {
     return <div>you got query failed for some reason</div>;
   }
-  const [, deletePost] = useDeletePostMutation();
 
   return (
     <>
@@ -71,7 +67,7 @@ const Home: NextPage = () => {
                     justifyContent="space-between"
                     w="100%"
                   >
-                    <Box>
+                    <Box flex={1}>
                       <NextLink href="/post/[id]" as={`/post/${data.id}`}>
                         <Link>
                           <Heading fontSize="xl">{data.title}</Heading>
@@ -85,26 +81,12 @@ const Home: NextPage = () => {
                       </Flex>
                       <Text mt={4}>{data.text.slice(0, 50)}</Text>
                     </Box>
-                    {biodata?.myBio?.id === data.creator.id && (
-                      <Box>
-                        <NextLink
-                          href="/post/update/[id]"
-                          as={`/post/update/${data.id}`}
-                        >
-                          <IconButton
-                            mr={4}
-                            as={Link}
-                            icon={<EditIcon />}
-                            aria-label="button"
-                          />
-                        </NextLink>
-                        <IconButton
-                          icon={<DeleteIcon />}
-                          aria-label="button"
-                          onClick={() => deletePost({ id: data.id })}
-                        />
-                      </Box>
-                    )}
+                    <Box>
+                      <EditAndDeleteButton
+                        id={data.id}
+                        creatorId={data.creator.id}
+                      />
+                    </Box>
                   </Flex>
                 </Flex>
               )
