@@ -1,4 +1,3 @@
-import { useRouter } from 'next/router';
 import { usePostQuery } from '../src/generated/graphql';
 import { useGetIdInt } from './useGetIdint';
 

@@ -1,10 +1,8 @@
-import { DeleteIcon, EditIcon } from '@chakra-ui/icons';
 import {
   Box,
   Button,
   Flex,
   Heading,
-  IconButton,
   Link,
   Stack,
   Text,
@@ -16,11 +14,7 @@ import React, { useState } from 'react';
 import { EditAndDeleteButton } from '../components/EditAndDeleteButton';
 import Layout from '../components/Layout';
 import Updoot from '../components/Updoot';
-import {
-  useDeletePostMutation,
-  useMyBioQuery,
-  usePostsQuery,
-} from '../src/generated/graphql';
+import { usePostsQuery } from '../src/generated/graphql';
 import { createUrqlClient } from '../utils/createUrqlClient';
 
 const Home: NextPage = () => {

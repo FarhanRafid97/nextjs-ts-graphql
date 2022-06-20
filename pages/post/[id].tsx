@@ -1,10 +1,10 @@
+import { Box, Heading, Text } from '@chakra-ui/react';
 import { withUrqlClient } from 'next-urql';
 import { useRouter } from 'next/router';
 import React from 'react';
 import Layout from '../../components/Layout';
 import { usePostQuery } from '../../src/generated/graphql';
 import { createUrqlClient } from '../../utils/createUrqlClient';
-import { Box, Flex, Link, Text, Button, Heading } from '@chakra-ui/react';
 
 interface DetailPostProps {}
 

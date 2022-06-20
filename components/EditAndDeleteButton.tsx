@@ -1,8 +1,7 @@
-import { Box, IconButton, Link } from '@chakra-ui/react';
-
-import React from 'react';
 import { DeleteIcon, EditIcon } from '@chakra-ui/icons';
+import { Box, IconButton, Link } from '@chakra-ui/react';
 import NextLink from 'next/link';
+import React from 'react';
 import { useDeletePostMutation, useMyBioQuery } from '../src/generated/graphql';
 import { isServer } from '../utils/isServer';
 
