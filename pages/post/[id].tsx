@@ -1,10 +1,17 @@
 import { Box, Heading, Text } from '@chakra-ui/react';
+<<<<<<< HEAD
 import { withUrqlClient } from 'next-urql';
+=======
+>>>>>>> apollo-server
 import { useRouter } from 'next/router';
 import React from 'react';
 import Layout from '../../components/Layout';
 import { usePostQuery } from '../../src/generated/graphql';
+<<<<<<< HEAD
 import { createUrqlClient } from '../../utils/createUrqlClient';
+=======
+import withApollo from '../../utils/withApollo';
+>>>>>>> apollo-server
 
 interface DetailPostProps {}
 
@@ -12,8 +19,8 @@ const DetailPost: React.FC<DetailPostProps> = ({}) => {
   const router = useRouter();
   const intId =
     typeof router.query.id === 'string' ? parseInt(router.query.id) : -1;
-  const [{ data, fetching }] = usePostQuery({
-    pause: intId === -1,
+  const { data, loading } = usePostQuery({
+    skip: intId === -1,
     variables: {
       id: intId,
     },
@@ -37,4 +44,4 @@ const DetailPost: React.FC<DetailPostProps> = ({}) => {
   );
 };
 
-export default withUrqlClient(createUrqlClient, { ssr: true })(DetailPost);
+export default withApollo({ ssr: true })(DetailPost);

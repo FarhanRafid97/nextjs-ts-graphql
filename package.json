@@ -10,10 +10,12 @@
     "gen": "graphql-codegen --config codegen.yml"
   },
   "dependencies": {
+    "@apollo/client": "^3.6.8",
     "@chakra-ui/icons": "^2.0.2",
     "@chakra-ui/react": "^2.2.1",
     "@emotion/react": "^11.9.3",
     "@emotion/styled": "^11.9.3",
+    "@graphql-codegen/typescript-react-apollo": "^3.2.16",
     "@graphql-codegen/typescript-urql": "^3.5.12",
     "@urql/exchange-graphcache": "^4.4.3",
     "formik": "^2.2.9",
@@ -21,6 +23,7 @@
     "graphql": "^16.5.0",
     "graphql-tag": "^2.12.6",
     "next": "12.1.6",
+    "next-apollo": "^5.0.8",
     "next-urql": "^3.3.3",
     "react": "18.2.0",
     "react-dom": "^18.2.0",

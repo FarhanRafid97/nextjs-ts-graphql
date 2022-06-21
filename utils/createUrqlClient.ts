@@ -1,4 +1,5 @@
-import { Cache, cacheExchange, Resolver } from '@urql/exchange-graphcache';
+import { cacheExchange, Resolver } from '@urql/exchange-graphcache';
+
 import gql from 'graphql-tag';
 import Router from 'next/router';
 import {

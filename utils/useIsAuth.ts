@@ -3,12 +3,12 @@ import { useEffect } from 'react';
 import { useMyBioQuery } from '../src/generated/graphql';
 
 export const useIsAuth = () => {
-  const [{ data, fetching }] = useMyBioQuery();
+  const { data, loading } = useMyBioQuery();
   const router = useRouter();
 
   useEffect(() => {
-    if (!fetching && !data?.myBio) {
+    if (!loading && !data?.myBio) {
       router.replace('/login?next=' + router.pathname);
     }
-  }, [fetching, data, router]);
+  }, [loading, data, router]);
 };

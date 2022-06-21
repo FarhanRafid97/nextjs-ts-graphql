@@ -1,17 +1,16 @@
 import { Box, Button, Link } from '@chakra-ui/react';
 import { Form, Formik } from 'formik';
-import { withUrqlClient } from 'next-urql';
 import React, { useState } from 'react';
 import InputField from '../components/InputField';
 import Wrapper from '../components/Wrapper';
 import { useForgetPasswordMutation } from '../src/generated/graphql';
-import { createUrqlClient } from '../utils/createUrqlClient';
 import { errorHandler } from '../utils/errorHandler';
+import withApollo from '../utils/withApollo';
 
 interface ForgetPasswordProps {}
 
 const ForgetPassword: React.FC<ForgetPasswordProps> = ({}) => {
-  const [, forgetPassword] = useForgetPasswordMutation();
+  const [forgetPassword] = useForgetPasswordMutation();
   const [linkForget, setLinkForget] = useState<string | null | undefined>('');
   console.log(linkForget);
   return (
@@ -19,7 +18,9 @@ const ForgetPassword: React.FC<ForgetPasswordProps> = ({}) => {
       <Formik
         initialValues={{ email: '' }}
         onSubmit={async (values, { setErrors }) => {
-          const response = await forgetPassword({ email: values.email });
+          const response = await forgetPassword({
+            variables: { email: values.email },
+          });
           if (response.data?.forgetPassword.error) {
             setErrors(errorHandler(response.data.forgetPassword.error));
           }
@@ -59,4 +60,4 @@ const ForgetPassword: React.FC<ForgetPasswordProps> = ({}) => {
   );
 };
 
-export default withUrqlClient(createUrqlClient)(ForgetPassword);
+export default withApollo({ ssr: false })(ForgetPassword);

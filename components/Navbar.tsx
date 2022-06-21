@@ -1,22 +1,31 @@
+import { useApolloClient } from '@apollo/client';
 import { Box, Button, Flex, Link } from '@chakra-ui/react';
 import NextLink from 'next/link';
 import React from 'react';
 import { useLogoutMutation, useMyBioQuery } from '../src/generated/graphql';
 import { isServer } from '../utils/isServer';
+import withApollo from '../utils/withApollo';
 interface NavbarProps {}
 
 const Navbar: React.FC<NavbarProps> = ({}) => {
-  const [{ fetching: logoutFetch }, logout] = useLogoutMutation();
-  const [{ data, fetching }] = useMyBioQuery({
-    pause: isServer(),
+  const router = useRouter();
+
+  const [logout, { loading: logoutFetch }] = useLogoutMutation();
+  const apolloClient = useApolloClient();
+  const { data, loading } = useMyBioQuery({
+    skip: isServer(),
   });
+  console.log(data);
 
   const logoutHandler = () => {
     logout();
+
+    // router.push('/');
+    apolloClient.resetStore();
   };
 
   let body;
-  if (isServer() || fetching) {
+  if (isServer() || loading) {
   } else if (!data?.myBio) {
     body = (
       <>
@@ -76,4 +85,4 @@ const Navbar: React.FC<NavbarProps> = ({}) => {
   );
 };
 
-export default Navbar;
+export default withApollo({ ssr: false })(Navbar);

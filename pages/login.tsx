@@ -1,26 +1,41 @@
 import { Box, Button, Flex, Link } from '@chakra-ui/react';
 import { Form, Formik } from 'formik';
-import { withUrqlClient } from 'next-urql';
 import NextLink from 'next/link';
 import { useRouter } from 'next/router';
 import React from 'react';
 import InputField from '../components/InputField';
 import Wrapper from '../components/Wrapper';
-import { useLoginMutation } from '../src/generated/graphql';
-import { createUrqlClient } from '../utils/createUrqlClient';
+import {
+  MyBioDocument,
+  MyBioQuery,
+  useLoginMutation,
+} from '../src/generated/graphql';
 import { errorHandler } from '../utils/errorHandler';
+import withApollo from '../utils/withApollo';
 interface registerProps {}
 
 const Login: React.FC<registerProps> = ({}) => {
   const router = useRouter();
   console.log(typeof router.query.next === 'string');
-  const [, register] = useLoginMutation();
+  const [login] = useLoginMutation();
   return (
     <Wrapper>
       <Formik
         initialValues={{ usernameOrEmail: '', password: '' }}
         onSubmit={async (values, { setErrors }) => {
-          const response = await register(values);
+          const response = await login({
+            variables: values,
+            update: (cache, { data }) => {
+              cache.writeQuery<MyBioQuery>({
+                query: MyBioDocument,
+                data: {
+                  __typename: 'Query',
+                  myBio: data?.loginUser.user,
+                },
+              });
+              cache.evict({ fieldName: 'posts:{}' });
+            },
+          });
           if (response.data?.loginUser.error) {
             setErrors(errorHandler(response.data.loginUser.error));
           } else if (response.data?.loginUser.user) {
@@ -57,4 +72,4 @@ const Login: React.FC<registerProps> = ({}) => {
   );
 };
 
-export default withUrqlClient(createUrqlClient)(Login);
+export default withApollo({ ssr: false })(Login);
