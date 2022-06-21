@@ -1,20 +1,15 @@
-<<<<<<< HEAD
-import { ChevronDownIcon, ChevronUpIcon } from '@chakra-ui/icons';
-import { Flex, IconButton, Text } from '@chakra-ui/react';
-=======
 import { ApolloCache, useApolloClient } from '@apollo/client';
 import { ChevronDownIcon, ChevronUpIcon } from '@chakra-ui/icons';
-import { Flex, IconButton, Text } from '@chakra-ui/react';
+import { Flex, IconButton, Text, useToast } from '@chakra-ui/react';
 import gql from 'graphql-tag';
->>>>>>> apollo-server
 import React, { useState } from 'react';
 import {
   PostsSnippetFragment,
+  useMyBioQuery,
   useVoteMutation,
   VoteMutation,
 } from '../src/generated/graphql';
 import withApollo from '../utils/withApollo';
-
 
 interface UpdootProps {
   post: PostsSnippetFragment;
@@ -22,25 +17,12 @@ interface UpdootProps {
 type LoadingType = 'upvote-loading' | 'downvote-loading' | 'no-loading';
 
 const Updoot: React.FC<UpdootProps> = ({ post }) => {
+  const toast = useToast();
+
   const [loading, setLoading] = useState<LoadingType>('no-loading');
   const [vote] = useVoteMutation();
+  const { data } = useMyBioQuery();
 
-  // const handlerVote = async (
-  //   _value: number,
-  //   _pId: number,
-  //   _loading: LoadingType,
-  //   _loadingUpOrDown: LoadingType,
-  //   vs: number
-  // ): Promise<MouseEvent | SVGElement | void> => {
-  //   setLoading(_loadingUpOrDown);
-  //   if (post.voteStatus === vs) {
-  //     console.log('updoot', post.voteStatus);
-  //     return;
-  //   }
-  //   await vote({ variables: { postId: _pId, value: _value } });
-  //   setLoading(_loading);
-  // };
-  // console.log(post);
   const apolloClient = useApolloClient();
 
   const updateAfterVote = (
@@ -87,6 +69,15 @@ const Updoot: React.FC<UpdootProps> = ({ post }) => {
       <IconButton
         bg={post.voteStatus === 1 ? 'green' : undefined}
         onClick={async () => {
+          if (!data?.myBio) {
+            toast({
+              title: `Login FIrst`,
+              status: 'error',
+              position: 'top',
+              isClosable: true,
+            });
+            return;
+          }
           if (post.voteStatus === 1) {
             return;
           }
@@ -110,6 +101,15 @@ const Updoot: React.FC<UpdootProps> = ({ post }) => {
       <IconButton
         aria-label="down vote"
         onClick={async () => {
+          if (!data?.myBio) {
+            toast({
+              title: `Login FIrst`,
+              status: 'error',
+              position: 'top',
+              isClosable: true,
+            });
+            return;
+          }
           if (post.voteStatus === -1) {
             return;
           }

@@ -1,7 +1,11 @@
 import { ApolloClient, InMemoryCache } from '@apollo/client';
 import { NextPageContext } from 'next';
 import { withApollo } from 'next-apollo';
-import { PaginatedPosts } from '../src/generated/graphql';
+import {
+  InputProfile,
+  MyBioQuery,
+  PaginatedPosts,
+} from '../src/generated/graphql';
 
 const createClient = (ctx: NextPageContext) =>
   new ApolloClient({
@@ -23,10 +27,23 @@ const createClient = (ctx: NextPageContext) =>
                 existing: PaginatedPosts | undefined,
                 incoming: PaginatedPosts
               ): PaginatedPosts {
+                console.log('posts apollo', existing);
+                console.log('posts apollo', incoming);
                 return {
                   ...incoming,
                   posts: [...(existing?.posts || []), ...incoming.posts],
                 };
+              },
+            },
+            myBio: {
+              keyArgs: [],
+              merge(
+                existing: MyBioQuery | undefined,
+                incoming: MyBioQuery
+              ): MyBioQuery | any {
+                console.log('mybio', existing);
+                console.log('mybio', incoming);
+                return '';
               },
             },
           },

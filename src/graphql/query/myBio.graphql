@@ -1,5 +1,11 @@
 query MyBio {
   myBio {
     ...RegularUser
+    profile {
+      address
+      gender
+      phoneNumber
+      id
+    }
   }
 }

@@ -35,6 +35,12 @@ export type FieldInput = {
   title: Scalars['String'];
 };
 
+export type InputProfile = {
+  address: Scalars['String'];
+  gender: Scalars['String'];
+  phoneNumber: Scalars['String'];
+};
+
 export type Mutation = {
   __typename?: 'Mutation';
   changePassword: UserResponse;
@@ -45,6 +51,7 @@ export type Mutation = {
   loginUser: UserResponse;
   logout: Scalars['Boolean'];
   updatePost?: Maybe<Post>;
+  updateProfile: Profile;
   vote: Scalars['Boolean'];
 };
 
@@ -88,6 +95,11 @@ export type MutationUpdatePostArgs = {
 };
 
 
+export type MutationUpdateProfileArgs = {
+  input: InputProfile;
+};
+
+
 export type MutationVoteArgs = {
   postId: Scalars['Int'];
   value: Scalars['Int'];
@@ -112,12 +124,23 @@ export type Post = {
   voteStatus?: Maybe<Scalars['Int']>;
 };
 
+export type Profile = {
+  __typename?: 'Profile';
+  address: Scalars['String'];
+  createdAt: Scalars['DateTime'];
+  gender: Scalars['String'];
+  id: Scalars['Float'];
+  phoneNumber: Scalars['String'];
+  updatedAt: Scalars['DateTime'];
+};
+
 export type Query = {
   __typename?: 'Query';
   hello: Scalars['String'];
   myBio?: Maybe<User>;
   post?: Maybe<Post>;
   posts: PaginatedPosts;
+  selectAllUser?: Maybe<Array<User>>;
 };
 
 
@@ -136,6 +159,8 @@ export type User = {
   createdAt: Scalars['DateTime'];
   email: Scalars['String'];
   id: Scalars['Float'];
+  profile: Profile;
+  profileId: Scalars['Float'];
   updatedAt: Scalars['DateTime'];
   username: Scalars['String'];
 };
@@ -219,6 +244,13 @@ export type UpdatePostMutationVariables = Exact<{
 
 export type UpdatePostMutation = { __typename?: 'Mutation', updatePost?: { __typename?: 'Post', title: string, text: string, id: number } | null };
 
+export type UpdateProfileMutationVariables = Exact<{
+  input: InputProfile;
+}>;
+
+
+export type UpdateProfileMutation = { __typename?: 'Mutation', updateProfile: { __typename?: 'Profile', address: string, phoneNumber: string, gender: string } };
+
 export type VoteMutationVariables = Exact<{
   value: Scalars['Int'];
   postId: Scalars['Int'];
@@ -230,7 +262,7 @@ export type VoteMutation = { __typename?: 'Mutation', vote: boolean };
 export type MyBioQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type MyBioQuery = { __typename?: 'Query', myBio?: { __typename?: 'User', id: number, username: string } | null };
+export type MyBioQuery = { __typename?: 'Query', myBio?: { __typename?: 'User', id: number, username: string, profile: { __typename?: 'Profile', address: string, gender: string, phoneNumber: string, id: number } } | null };
 
 export type PostQueryVariables = Exact<{
   id: Scalars['Int'];
@@ -562,6 +594,41 @@ export function useUpdatePostMutation(baseOptions?: Apollo.MutationHookOptions<U
 export type UpdatePostMutationHookResult = ReturnType<typeof useUpdatePostMutation>;
 export type UpdatePostMutationResult = Apollo.MutationResult<UpdatePostMutation>;
 export type UpdatePostMutationOptions = Apollo.BaseMutationOptions<UpdatePostMutation, UpdatePostMutationVariables>;
+export const UpdateProfileDocument = gql`
+    mutation UpdateProfile($input: InputProfile!) {
+  updateProfile(input: $input) {
+    address
+    phoneNumber
+    gender
+  }
+}
+    `;
+export type UpdateProfileMutationFn = Apollo.MutationFunction<UpdateProfileMutation, UpdateProfileMutationVariables>;
+
+/**
+ * __useUpdateProfileMutation__
+ *
+ * To run a mutation, you first call `useUpdateProfileMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateProfileMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateProfileMutation, { data, loading, error }] = useUpdateProfileMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useUpdateProfileMutation(baseOptions?: Apollo.MutationHookOptions<UpdateProfileMutation, UpdateProfileMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateProfileMutation, UpdateProfileMutationVariables>(UpdateProfileDocument, options);
+      }
+export type UpdateProfileMutationHookResult = ReturnType<typeof useUpdateProfileMutation>;
+export type UpdateProfileMutationResult = Apollo.MutationResult<UpdateProfileMutation>;
+export type UpdateProfileMutationOptions = Apollo.BaseMutationOptions<UpdateProfileMutation, UpdateProfileMutationVariables>;
 export const VoteDocument = gql`
     mutation Vote($value: Int!, $postId: Int!) {
   vote(value: $value, postId: $postId)
@@ -598,6 +665,12 @@ export const MyBioDocument = gql`
     query MyBio {
   myBio {
     ...RegularUser
+    profile {
+      address
+      gender
+      phoneNumber
+      id
+    }
   }
 }
     ${RegularUserFragmentDoc}`;

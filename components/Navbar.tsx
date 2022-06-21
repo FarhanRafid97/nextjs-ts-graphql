@@ -5,6 +5,7 @@ import React from 'react';
 import { useLogoutMutation, useMyBioQuery } from '../src/generated/graphql';
 import { isServer } from '../utils/isServer';
 import withApollo from '../utils/withApollo';
+import { useRouter } from 'next/router';
 interface NavbarProps {}
 
 const Navbar: React.FC<NavbarProps> = ({}) => {
@@ -15,7 +16,6 @@ const Navbar: React.FC<NavbarProps> = ({}) => {
   const { data, loading } = useMyBioQuery({
     skip: isServer(),
   });
-  console.log(data);
 
   const logoutHandler = () => {
     logout();
@@ -29,9 +29,6 @@ const Navbar: React.FC<NavbarProps> = ({}) => {
   } else if (!data?.myBio) {
     body = (
       <>
-        <NextLink href="/create-post">
-          <Link>Create Post</Link>
-        </NextLink>
         <NextLink href="/login">
           <Link>Login</Link>
         </NextLink>
@@ -44,8 +41,8 @@ const Navbar: React.FC<NavbarProps> = ({}) => {
     body = (
       <>
         <Flex columnGap="15px" alignItems="center">
-          <NextLink href="/create-post">
-            <Link>Create Post</Link>
+          <NextLink href="/profile">
+            <Link>Profile</Link>
           </NextLink>
           <Box mr={2}>{data.myBio.username}</Box>
           <Button
