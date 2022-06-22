@@ -3,6 +3,7 @@ import { Form, Formik } from 'formik';
 import { useRouter } from 'next/router';
 import React from 'react';
 import InputField from '../components/InputField';
+import Layout from '../components/Layout';
 import Wrapper from '../components/Wrapper';
 import {
   MyBioDocument,
@@ -18,7 +19,7 @@ const Register: React.FC<registerProps> = ({}) => {
   const router = useRouter();
   const [register] = useRegisterMutation();
   return (
-    <Wrapper>
+    <Layout>
       <Formik
         initialValues={{ email: '', username: '', password: '' }}
         onSubmit={async (values, { setErrors }) => {
@@ -29,15 +30,16 @@ const Register: React.FC<registerProps> = ({}) => {
                 query: MyBioDocument,
                 data: {
                   __typename: 'Query',
-                  myBio: data?.createUser.user,
+                  myBio: data?.createUser?.user,
                 },
               });
               cache.evict({ fieldName: 'posts:{}' });
             },
           });
-          if (response.data?.createUser.error) {
+          console.log(response);
+          if (response.data?.createUser?.error) {
             setErrors(errorHandler(response.data.createUser.error));
-          } else if (response.data?.createUser.user) {
+          } else if (response.data?.createUser?.user) {
             router.push('/');
           }
         }}
@@ -62,7 +64,7 @@ const Register: React.FC<registerProps> = ({}) => {
           </Form>
         )}
       </Formik>
-    </Wrapper>
+    </Layout>
   );
 };
 

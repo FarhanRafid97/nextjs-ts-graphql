@@ -35,17 +35,6 @@ const createClient = (ctx: NextPageContext) =>
                 };
               },
             },
-            myBio: {
-              keyArgs: [],
-              merge(
-                existing: MyBioQuery | undefined,
-                incoming: MyBioQuery
-              ): MyBioQuery | any {
-                console.log('mybio', existing);
-                console.log('mybio', incoming);
-                return '';
-              },
-            },
           },
         },
       },

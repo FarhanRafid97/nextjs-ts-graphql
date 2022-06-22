@@ -26,9 +26,7 @@ const EditProfile: React.FC<EditProfileProps> = ({}) => {
   useIsAuth();
   const { data } = useMyBioQuery();
   const [updateProfile] = useUpdateProfileMutation();
-  console.log(data);
 
-  console.log(data);
   return (
     <Layout>
       <Formik
@@ -38,8 +36,7 @@ const EditProfile: React.FC<EditProfileProps> = ({}) => {
           gender: data?.myBio?.profile.gender,
         }}
         onSubmit={async (values) => {
-          updateProfile;
-          const { errors } = await updateProfile({
+          await updateProfile({
             variables: {
               input: {
                 address: values.address as string,
@@ -47,14 +44,10 @@ const EditProfile: React.FC<EditProfileProps> = ({}) => {
                 gender: values.gender as string,
               },
             },
-            update: (cache) => {
-              console.log(cache);
-              return cache.evict({ fieldName: 'myBio:{}' });
-            },
+            update: (cache) => cache.evict({}),
           });
-          if (!errors) {
-            router.back();
-          }
+
+          router.back();
         }}
       >
         {({ isSubmitting }) => (

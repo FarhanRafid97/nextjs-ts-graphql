@@ -4,6 +4,7 @@ import NextLink from 'next/link';
 import { useRouter } from 'next/router';
 import React from 'react';
 import InputField from '../components/InputField';
+import Layout from '../components/Layout';
 import Wrapper from '../components/Wrapper';
 import {
   MyBioDocument,
@@ -16,10 +17,10 @@ interface registerProps {}
 
 const Login: React.FC<registerProps> = ({}) => {
   const router = useRouter();
-  console.log(typeof router.query.next === 'string');
+
   const [login] = useLoginMutation();
   return (
-    <Wrapper>
+    <Layout>
       <Formik
         initialValues={{ usernameOrEmail: '', password: '' }}
         onSubmit={async (values, { setErrors }) => {
@@ -33,9 +34,11 @@ const Login: React.FC<registerProps> = ({}) => {
                   myBio: data?.loginUser.user,
                 },
               });
+
               cache.evict({ fieldName: 'posts:{}' });
             },
           });
+          console.log(response);
           if (response.data?.loginUser.error) {
             setErrors(errorHandler(response.data.loginUser.error));
           } else if (response.data?.loginUser.user) {
@@ -68,7 +71,7 @@ const Login: React.FC<registerProps> = ({}) => {
           </Form>
         )}
       </Formik>
-    </Wrapper>
+    </Layout>
   );
 };
 

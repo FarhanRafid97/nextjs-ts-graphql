@@ -61,7 +61,7 @@ const Profile: React.FC<ProfileProps> = ({}) => {
             </NextLink>
           </Flex>
         </WrapItem>
-        <Box fontSize="18px">
+        <Flex direction="column" alignItems="center" fontSize="18px">
           <Flex columnGap="5px">
             <Text size="lg">Name : </Text> <Text> {data?.myBio?.username}</Text>
           </Flex>
@@ -74,10 +74,10 @@ const Profile: React.FC<ProfileProps> = ({}) => {
             <Text>{data?.myBio?.profile.phoneNumber}</Text>
           </Flex>
           <Flex columnGap="5px">
-            <Text size="lg">Name : </Text>{' '}
+            <Text size="lg">Gender : </Text>{' '}
             <Text>{data?.myBio?.profile.gender}</Text>
           </Flex>
-        </Box>
+        </Flex>
       </Flex>
     </Layout>
   );

@@ -1,17 +1,11 @@
 import { Box, Heading, Text } from '@chakra-ui/react';
-<<<<<<< HEAD
-import { withUrqlClient } from 'next-urql';
-=======
->>>>>>> apollo-server
+
 import { useRouter } from 'next/router';
 import React from 'react';
 import Layout from '../../components/Layout';
 import { usePostQuery } from '../../src/generated/graphql';
-<<<<<<< HEAD
-import { createUrqlClient } from '../../utils/createUrqlClient';
-=======
+
 import withApollo from '../../utils/withApollo';
->>>>>>> apollo-server
 
 interface DetailPostProps {}
 

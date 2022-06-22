@@ -1,5 +1,16 @@
 mutation Register($option: UsernamePasswordInput!) {
   createUser(option: $option) {
-    ...RegularUserResponse
+    user {
+      ...RegularUser
+      profile {
+        id
+        address
+        gender
+        phoneNumber
+      }
+    }
+    error {
+      ...RegularError
+    }
   }
 }

@@ -45,7 +45,7 @@ export type Mutation = {
   __typename?: 'Mutation';
   changePassword: UserResponse;
   createPost: Post;
-  createUser: UserResponse;
+  createUser?: Maybe<UserResponse>;
   deletePost: Scalars['Boolean'];
   forgetPassword: EmailResponse;
   loginUser: UserResponse;
@@ -221,7 +221,7 @@ export type LoginMutationVariables = Exact<{
 }>;
 
 
-export type LoginMutation = { __typename?: 'Mutation', loginUser: { __typename?: 'UserResponse', user?: { __typename?: 'User', id: number, username: string } | null, error?: Array<{ __typename?: 'FieldError', field: string, status: number, message: string }> | null } };
+export type LoginMutation = { __typename?: 'Mutation', loginUser: { __typename?: 'UserResponse', user?: { __typename?: 'User', id: number, username: string, profile: { __typename?: 'Profile', id: number, address: string, gender: string, phoneNumber: string } } | null, error?: Array<{ __typename?: 'FieldError', field: string, status: number, message: string }> | null } };
 
 export type LogoutMutationVariables = Exact<{ [key: string]: never; }>;
 
@@ -233,7 +233,7 @@ export type RegisterMutationVariables = Exact<{
 }>;
 
 
-export type RegisterMutation = { __typename?: 'Mutation', createUser: { __typename?: 'UserResponse', user?: { __typename?: 'User', id: number, username: string } | null, error?: Array<{ __typename?: 'FieldError', field: string, status: number, message: string }> | null } };
+export type RegisterMutation = { __typename?: 'Mutation', createUser?: { __typename?: 'UserResponse', user?: { __typename?: 'User', id: number, username: string, profile: { __typename?: 'Profile', id: number, address: string, gender: string, phoneNumber: string } } | null, error?: Array<{ __typename?: 'FieldError', field: string, status: number, message: string }> | null } | null };
 
 export type UpdatePostMutationVariables = Exact<{
   id: Scalars['Int'];
@@ -463,10 +463,22 @@ export type ForgetPasswordMutationOptions = Apollo.BaseMutationOptions<ForgetPas
 export const LoginDocument = gql`
     mutation Login($usernameOrEmail: String!, $password: String!) {
   loginUser(usernameOrEmail: $usernameOrEmail, password: $password) {
-    ...RegularUserResponse
+    user {
+      ...RegularUser
+      profile {
+        id
+        address
+        gender
+        phoneNumber
+      }
+    }
+    error {
+      ...RegularError
+    }
   }
 }
-    ${RegularUserResponseFragmentDoc}`;
+    ${RegularUserFragmentDoc}
+${RegularErrorFragmentDoc}`;
 export type LoginMutationFn = Apollo.MutationFunction<LoginMutation, LoginMutationVariables>;
 
 /**
@@ -527,10 +539,22 @@ export type LogoutMutationOptions = Apollo.BaseMutationOptions<LogoutMutation, L
 export const RegisterDocument = gql`
     mutation Register($option: UsernamePasswordInput!) {
   createUser(option: $option) {
-    ...RegularUserResponse
+    user {
+      ...RegularUser
+      profile {
+        id
+        address
+        gender
+        phoneNumber
+      }
+    }
+    error {
+      ...RegularError
+    }
   }
 }
-    ${RegularUserResponseFragmentDoc}`;
+    ${RegularUserFragmentDoc}
+${RegularErrorFragmentDoc}`;
 export type RegisterMutationFn = Apollo.MutationFunction<RegisterMutation, RegisterMutationVariables>;
 
 /**
